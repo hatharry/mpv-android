@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <mpv/client.h>
 
@@ -14,6 +15,7 @@ extern "C" {
     jni_func(void, setPropertyInt, jstring property, jobject value);
     jni_func(jobject, getPropertyBoolean, jstring property);
     jni_func(void, setPropertyBoolean, jstring property, jobject value);
+    jni_func(jobject, getPropertyCache, jstring property);
     jni_func(jstring, getPropertyString, jstring jproperty);
     jni_func(void, setPropertyString, jstring jproperty, jstring jvalue);
 
@@ -73,6 +75,29 @@ jni_func(jobject, getPropertyBoolean, jstring jproperty) {
     if (common_get_property(env, jproperty, MPV_FORMAT_FLAG, &value) < 0)
         return NULL;
     return env->NewObject(java_Boolean, java_Boolean_init, (jboolean)value);
+}
+
+jni_func(jobject, getPropertyCache, jstring jproperty) {
+    mpv_node node;
+    mpv_node node2;
+    mpv_node node3;
+    mpv_node node4;
+    if (common_get_property(env, env->NewStringUTF("demuxer-cache-state"), MPV_FORMAT_NODE, &node) < 0)
+        return NULL;
+    for (int i = 0; i < node.u.list->num; i++){
+        if (!strcmp(node.u.list->keys[i], "seekable-ranges")){
+            node2 = node.u.list->values[i];
+            break;
+        }
+    }
+    node3 = node2.u.list->values[0];
+    for (int i = 0; i < node3.u.list->num; i++){
+        if (!strcmp(node3.u.list->keys[i], env->GetStringUTFChars(jproperty, NULL))){
+            node4 = node3.u.list->values[i];
+            break;
+        }
+    }
+    return env->NewObject(java_Double, java_Double_init, (jdouble)node4.u.double_);
 }
 
 jni_func(jstring, getPropertyString, jstring jproperty) {

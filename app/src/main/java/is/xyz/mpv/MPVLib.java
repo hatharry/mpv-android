@@ -33,6 +33,7 @@ public class MPVLib {
      public static native void setPropertyBoolean(String property, Boolean value);
      public static native String getPropertyString(String property);
      public static native void setPropertyString(String property, String value);
+     public static native Double getPropertyCache(String property);
 
      public static native void observeProperty(String property, int format);
 
