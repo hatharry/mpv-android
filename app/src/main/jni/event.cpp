@@ -49,6 +49,7 @@ void *event_thread(void *arg) {
         mpv_event_log_message *msg = NULL;
         mpv_event_end_file *end_file = NULL;
         mpv_event_property endProp;
+        mpv_event_property logProp;
 
         mp_event = mpv_wait_event(g_mpv, -1.0);
 
@@ -62,6 +63,8 @@ void *event_thread(void *arg) {
         case MPV_EVENT_LOG_MESSAGE:
             msg = (mpv_event_log_message*)mp_event->data;
             ALOGV("[%s:%s] %s", msg->prefix, msg->level, msg->text);
+            logProp = {"log-msg", MPV_FORMAT_STRING, (void*)&msg->text};
+            sendPropertyUpdateToJava(env, &logProp);
             break;
         case MPV_EVENT_PROPERTY_CHANGE:
             mp_property = (mpv_event_property*)mp_event->data;
