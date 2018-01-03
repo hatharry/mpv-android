@@ -21,6 +21,7 @@ LDFLAGS="$extrald" \
 	--disable-iconv --lua=52 \
 	--enable-libmpv-shared \
 	--disable-manpage-build \
+	--enable-lgpl \
 	-o "`pwd`/_build$ndk_suffix"
 
 ./waf build -j6
