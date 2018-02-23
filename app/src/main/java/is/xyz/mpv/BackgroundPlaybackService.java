@@ -92,6 +92,11 @@ public class BackgroundPlaybackService extends Service implements EventObserver 
         if (eventId == MPVLib.mpvEventId.MPV_EVENT_IDLE)
             stopSelf();
     }
+	
+	@Override
+	public void log(String prefix, String level, String text) {
+		
+	}
 
     private static final int NOTIFICATION_ID = 12345; // TODO: put this into resource file
     private static final String TAG = "mpv";
