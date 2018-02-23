@@ -539,6 +539,9 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
         }
         runOnUiThread { eventUi(eventId) }
     }
+    
+    override fun log(prefix: String, level: String, text: String) {
+    }
 
     private fun getInitialBrightness(): Float {
         // "local" brightness first

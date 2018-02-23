@@ -37,6 +37,19 @@ static void sendEventToJava(JNIEnv *env, int event) {
     env->CallStaticVoidMethod(mpv_MPVLib, mpv_MPVLib_event, event);
 }
 
+static void sendLogToJava(JNIEnv *env, mpv_event_log_message *msg) {
+    jstring jprefix = env->NewStringUTF(msg->prefix);
+    jstring jlevel = env->NewStringUTF(msg->level);
+    jstring jtext = env->NewStringUTF(msg->text);
+    env->CallStaticVoidMethod(mpv_MPVLib, mpv_MPVLib_log, jprefix, jlevel, jtext);
+    if (jprefix)
+        env->DeleteLocalRef(jprefix);
+    if (jlevel)
+        env->DeleteLocalRef(jlevel);
+    if (jtext)
+        env->DeleteLocalRef(jtext);
+}
+
 void *event_thread(void *arg) {
     JNIEnv *env = NULL;
     acquire_jni_env(g_vm, &env);
@@ -49,7 +62,6 @@ void *event_thread(void *arg) {
         mpv_event_log_message *msg = NULL;
         mpv_event_end_file *end_file = NULL;
         mpv_event_property endProp;
-        mpv_event_property logProp;
 
         mp_event = mpv_wait_event(g_mpv, -1.0);
 
@@ -63,8 +75,7 @@ void *event_thread(void *arg) {
         case MPV_EVENT_LOG_MESSAGE:
             msg = (mpv_event_log_message*)mp_event->data;
             ALOGV("[%s:%s] %s", msg->prefix, msg->level, msg->text);
-            logProp = {"log-msg", MPV_FORMAT_STRING, (void*)&msg->text};
-            sendPropertyUpdateToJava(env, &logProp);
+            sendLogToJava(env, msg);
             break;
         case MPV_EVENT_PROPERTY_CHANGE:
             mp_property = (mpv_event_property*)mp_event->data;

@@ -72,6 +72,11 @@ public class MPVLib {
                o.event(eventId);
      }
 
+     public static void log(String prefix, String level, String text) {
+          for (EventObserver o : observers)
+               o.log(prefix, level, text);
+     }
+
      public static class mpvFormat {
           public static final int MPV_FORMAT_NONE=0;
           public static final int MPV_FORMAT_STRING=1;
