@@ -42,9 +42,8 @@ public class MPVLib {
      public static void addObserver(EventObserver o) {
           observers.add(o);
      }
-
-     public static void clearObservers() {
-          observers.clear();
+     public static void removeObserver(EventObserver o) {
+          observers.remove(o);
      }
 
      public static void eventProperty(String property, long value) {
