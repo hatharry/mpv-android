@@ -2,7 +2,7 @@ package is.xyz.mpv;
 
 // Wrapper for native library
 
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.List;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
@@ -37,7 +37,7 @@ public class MPVLib {
 
      public static native void observeProperty(String property, int format);
 
-     private static final List<EventObserver> observers = new ArrayList<>();
+     private static final List<EventObserver> observers = new CopyOnWriteArrayList<>();
 
      public static void addObserver(EventObserver o) {
           observers.add(o);
