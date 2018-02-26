@@ -90,13 +90,22 @@ jni_func(jobject, getPropertyCache, jstring jproperty) {
             break;
         }
     }
+	if (node2.format != MPV_FORMAT_NODE_ARRAY || node2.u.list->num <= 0){
+		return NULL;
+	}
     node3 = node2.u.list->values[0];
+	if (node3.format != MPV_FORMAT_NODE_MAP || node3.u.list->num <= 0){
+		return NULL;
+	}
     for (int i = 0; i < node3.u.list->num; i++){
         if (!strcmp(node3.u.list->keys[i], env->GetStringUTFChars(jproperty, NULL))){
             node4 = node3.u.list->values[i];
             break;
         }
     }
+	if (node4.format != MPV_FORMAT_DOUBLE){
+		return NULL;
+	}
     return env->NewObject(java_Double, java_Double_init, (jdouble)node4.u.double_);
 }
 
