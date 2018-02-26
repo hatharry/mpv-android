@@ -27,5 +27,5 @@ extra=
 make -j6
 make DESTDIR="$prefix_dir" install
 # fix linking (pkg-config seems to ignore Requires.private)
-${SED:-sed} '/^Libs:/ s|$| -lnettle -lhogweed|' -i \
+${SED:-sed} '/^Libs:/ s|$| -lnettle -lhogweed -lz|' -i \
 	$prefix_dir/lib/pkgconfig/gnutls.pc
