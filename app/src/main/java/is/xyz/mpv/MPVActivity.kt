@@ -16,6 +16,7 @@ import android.provider.Settings
 import android.util.Log
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Build
 import android.preference.PreferenceManager.getDefaultSharedPreferences
 import android.support.v4.content.ContextCompat
 import android.view.*
@@ -175,9 +176,9 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
     }
 
     private fun shouldBackground(): Boolean {
-        // when mpv is just finishing playback it's not "paused" but we don't want to background,
-        // so check `core-idle` instead of `pause`
-        if (MPVLib.getPropertyBoolean("core-idle") ?: true)
+        if (isFinishing) // about to exit?
+            return false
+        if (player.paused ?: true)
             return false
         when (backgroundPlayMode) {
             "always" -> return true
@@ -190,7 +191,19 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
     }
 
     override fun onPause() {
+        val multiWindowMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) isInMultiWindowMode else false
+        if (multiWindowMode) {
+            Log.v(TAG, "Going into multi-window mode")
+            super.onPause()
+            return
+        }
+
         val shouldBackground = shouldBackground()
+        if (shouldBackground && !MPVLib.getPropertyString("video-format").isNullOrEmpty())
+            BackgroundPlaybackService.thumbnail = MPVLib.grabThumbnail(THUMB_SIZE)
+        else
+            BackgroundPlaybackService.thumbnail = null
+
         player.onPause()
         super.onPause()
 
@@ -227,6 +240,12 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
     }
 
     override fun onResume() {
+        // If we weren't actually in the background (e.g. multi window mode), don't reinitialize stuff
+        if (activityIsForeground) {
+            super.onResume()
+            return
+        }
+
         // Init controls to be hidden and view fullscreen
         initControls()
         syncSettings()
@@ -597,9 +616,6 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
         }
         runOnUiThread { eventUi(eventId) }
     }
-    
-    override fun log(prefix: String, level: String, text: String) {
-    }
 
     private fun getInitialBrightness(): Float {
         // "local" brightness first
@@ -673,6 +689,8 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
         private val CONTROLS_DISPLAY_TIMEOUT = 2000L
         // how far to seek backward/forward with (currently) TV remote buttons
         private val BUTTON_SEEK_RANGE = 10
+        // size (px) of the thumbnail displayed with background play notification
+        private val THUMB_SIZE = 192
     }
 }
 

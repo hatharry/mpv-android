@@ -7,7 +7,7 @@ v_ndk=r16b
 
 v_lua=5.2.4
 v_libass=0.14.0
-v_fribidi=0.19.7
+v_fribidi=1.0.2
 v_freetype=2-9
 v_gnutls=3.6.2
 v_nettle=3.4
@@ -30,7 +30,7 @@ dep_mpv_android=(mpv)
 ## Travis-related
 
 # pinned ffmpeg commit used by travis-ci
-v_travis_ffmpeg=9fe61b61074b013bc0a9289a207efce2107bfbcf
+v_travis_ffmpeg=53688b62ca96ad9a3b0e7d201caca61c79a68648
 
 # filename used to uniquely identify a build prefix
 travis_tarball="prefix-ndk-${v_ndk}-lua-${v_lua}-libass-${v_libass}-fribidi-${v_fribidi}-freetype-${v_freetype}-gnutls-${v_gnutls}-nettle-${v_nettle}-ffmpeg-${v_travis_ffmpeg}.tgz"

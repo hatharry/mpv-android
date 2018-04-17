@@ -6,5 +6,4 @@ interface EventObserver {
     fun eventProperty(property: String, value: Boolean)
     fun eventProperty(property: String, value: String)
     fun event(eventId: Int)
-    fun log(prefix: String, level: String, text: String)
 }
