@@ -13,7 +13,9 @@ build_prefix() {
 	# build everything mpv depends on (but not mpv itself)
 	for x in ${dep_mpv[@]}; do
 		echo "==> Building $x"
-		./buildall.sh $x
+		./buildall.sh --arch armv7l $x
+		./buildall.sh --arch arm64 $x
+		./buildall.sh --arch x86 $x
 	done
 
 	if [ -n "$GITHUB_TOKEN" ]; then
@@ -22,7 +24,7 @@ build_prefix() {
 
 		echo "==> Uploading the prefix"
 		curl -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/x-gzip" --data-binary @$travis_tarball \
-			"https://uploads.github.com/repos/mpv-android/prebuilt-prefixes/releases/9015619/assets?name=$travis_tarball"
+			"https://uploads.github.com/repos/hatharry/prebuilt-prefixes/releases/12947922/assets?name=$travis_tarball"
 	fi
 }
 
@@ -42,7 +44,7 @@ if [ "$1" == "install" ]; then
 	echo "==> Trying to fetch existing prefix"
 	mkdir -p prefix
 	(
-		$WGET "https://github.com/mpv-android/prebuilt-prefixes/releases/download/prefixes/$travis_tarball" -O prefix.tgz \
+		$WGET "https://github.com/hatharry/prebuilt-prefixes/releases/download/prefixes/$travis_tarball" -O prefix.tgz \
 		&& tar -xzf prefix.tgz -C prefix && rm prefix.tgz
 	) || build_prefix
 	exit 0
@@ -52,8 +54,20 @@ else
 	exit 1
 fi
 
-echo "==> Building mpv"
-./buildall.sh --no-deps mpv || {
+echo "==> Building mpv armv7l"
+./buildall.sh --no-deps --arch armv7l mpv || {
+	# show logfile if configure failed
+	[ ! -f deps/mpv/_build/config.h ] && cat deps/mpv/_build/config.log
+	exit 1
+}
+echo "==> Building mpv arm64"
+./buildall.sh --no-deps --arch arm64 mpv || {
+	# show logfile if configure failed
+	[ ! -f deps/mpv/_build/config.h ] && cat deps/mpv/_build/config.log
+	exit 1
+}
+echo "==> Building mpv x86"
+./buildall.sh --no-deps --arch x86 mpv || {
 	# show logfile if configure failed
 	[ ! -f deps/mpv/_build/config.h ] && cat deps/mpv/_build/config.log
 	exit 1
@@ -62,7 +76,38 @@ echo "==> Building mpv"
 echo "==> Building mpv-android"
 ./buildall.sh --no-deps
 
+echo "==> Compressing the jar"
+pushd ../app/build/intermediates/classes/debug/
+zip -r -9 ../../../outputs/libmpv_all.jar is/xyz/mpv
+popd
+
+pushd ../app/build/tmp/kotlin-classes/debug/
+zip -r -9 ../../../outputs/libmpv_all.jar is/xyz/mpv/
+popd
+
+pushd ../app/build/outputs
+cp libmpv_all.jar libmpv_arm.jar
+cp libmpv_all.jar libmpv_x86.jar
+popd
+
+pushd ../app/src/main/
+mv libs lib
+zip -r -9 ../../build/outputs/libmpv_all.jar lib
+zip -r -9 ../../build/outputs/libmpv_arm.jar lib/armeabi-v7a
+zip -r -9 ../../build/outputs/libmpv_x86.jar lib/x86
+mv lib libs
+popd
+
 echo "==> Uploading the .apk"
 curl -F'file=@../app/build/outputs/apk/debug/app-debug.apk' http://0x0.st
+
+echo "==> Uploading the libmpv_all.jar"
+curl -F'file=@../app/build/outputs/libmpv_all.jar' http://0x0.st
+
+echo "==> Uploading the libmpv_arm.jar"
+curl -F'file=@../app/build/outputs/libmpv_arm.jar' http://0x0.st
+
+echo "==> Uploading the libmpv_x86.jar"
+curl -F'file=@../app/build/outputs/libmpv_x86.jar' http://0x0.st
 
 exit 0

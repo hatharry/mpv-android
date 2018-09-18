@@ -14,7 +14,9 @@ fi
 [ -f waf ] || ./bootstrap.py
 
 extrald=
+extra=
 [[ "$ndk_triple" == "aarch64"* ]] && extrald="-fuse-ld=gold"
+[[ "$ndk_triple" == "i686"* ]] && extra="--disable-asm"
 
 LDFLAGS="$extrald" \
 ./waf configure \
@@ -22,7 +24,8 @@ LDFLAGS="$extrald" \
 	--enable-libmpv-shared \
 	--disable-manpage-build \
 	--enable-lgpl \
-	-o "`pwd`/_build$ndk_suffix"
+	-o "`pwd`/_build$ndk_suffix" \
+	$extra
 
 ./waf build -j6
 ./waf install --destdir="$prefix_dir"

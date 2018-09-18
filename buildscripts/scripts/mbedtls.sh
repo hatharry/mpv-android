@@ -11,6 +11,8 @@ else
 	exit 255
 fi
 
+[[ "$ndk_triple" == "i686"* ]] && export CFLAGS=-O0
+
 $0 clean # separate building not supported, always clean
 
 export AR=$ndk_triple-ar
