@@ -63,13 +63,13 @@ echo "==> Building mpv armv7l"
 echo "==> Building mpv arm64"
 ./buildall.sh --no-deps --arch arm64 mpv || {
 	# show logfile if configure failed
-	[ ! -f deps/mpv/_build/config.h ] && cat deps/mpv/_build/config.log
+	[ ! -f deps/mpv/_build-arm64/config.h ] && cat deps/mpv/_build-arm64/config.log
 	exit 1
 }
 echo "==> Building mpv x86"
 ./buildall.sh --no-deps --arch x86 mpv || {
 	# show logfile if configure failed
-	[ ! -f deps/mpv/_build/config.h ] && cat deps/mpv/_build/config.log
+	[ ! -f deps/mpv/_build-x86/config.h ] && cat deps/mpv/_build-x86/config.log
 	exit 1
 }
 
