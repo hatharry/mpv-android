@@ -18,7 +18,7 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.preference.PreferenceManager.getDefaultSharedPreferences
-import android.support.v4.content.ContextCompat
+import androidx.core.content.ContextCompat
 import android.view.*
 import android.widget.SeekBar
 import android.widget.Toast
@@ -67,6 +67,8 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
     private var gesturesEnabled = true
 
     private var backgroundPlayMode = ""
+
+    private var shouldSavePosition = false
 
     private fun initListeners() {
         controls.cycleAudioBtn.setOnClickListener { _ ->  cycleAudio() }
@@ -205,6 +207,10 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
         else
             BackgroundPlaybackService.thumbnail = null
 
+        // player.onPause() modifies the playback state, so save stuff beforehand
+        if (isFinishing)
+            savePosition()
+
         player.onPause()
         super.onPause()
 
@@ -235,6 +241,7 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
         }
         this.gesturesEnabled = prefs.getBoolean("touch_gestures", true)
         this.backgroundPlayMode = prefs.getString("background_play", "never")
+        this.shouldSavePosition = prefs.getBoolean("save_position", false)
 
         if (this.statsOnlyFPS)
             statsTextView.setTextColor((0xFF00FF00).toInt()) // green
@@ -259,6 +266,16 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
 
         player.onResume()
         super.onResume()
+    }
+
+    private fun savePosition() {
+        if (!shouldSavePosition)
+            return
+        if (MPVLib.getPropertyBoolean("eof-reached") ?: true) {
+            Log.d(TAG, "player indicates EOF, not saving watch-later config")
+            return
+        }
+        MPVLib.command(arrayOf("write-watch-later-config"))
     }
 
     private fun updateStats() {
@@ -328,6 +345,13 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
 
     override fun dispatchKeyEvent(ev: KeyEvent): Boolean {
         showControls()
+        // try built-in event handler first, forward all other events to libmpv
+        if (ev.action == KeyEvent.ACTION_DOWN && interceptKeyDown(ev)) {
+            return true
+        } else if (player.onKey(ev)) {
+            return true
+        }
+
         return super.dispatchKeyEvent(ev)
     }
 
@@ -348,20 +372,33 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
         return true
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        when (keyCode) {
+    private fun interceptKeyDown(event: KeyEvent): Boolean {
+        // intercept some keys to provide functionality "native" to
+        // mpv-android even if libmpv already implements these
+        var unhandeled = 0
+
+        when (event.unicodeChar.toChar()) {
+            // overrides a default binding:
+            'j' -> cycleSub()
+            '#' -> cycleAudio()
+
+            else -> unhandeled++
+        }
+        when (event.keyCode) {
+            // no default binding:
             KeyEvent.KEYCODE_CAPTIONS -> cycleSub()
-            KeyEvent.KEYCODE_HEADSETHOOK,
-            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> player.cyclePause()
+            KeyEvent.KEYCODE_HEADSETHOOK -> player.cyclePause()
             KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK -> cycleAudio()
-            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> seekRelative(BUTTON_SEEK_RANGE)
+            KeyEvent.KEYCODE_INFO -> toggleControls()
+
+            // overrides a default binding:
             KeyEvent.KEYCODE_MEDIA_PAUSE -> player.paused = true
             KeyEvent.KEYCODE_MEDIA_PLAY -> player.paused = false
-            KeyEvent.KEYCODE_MEDIA_REWIND -> seekRelative(-BUTTON_SEEK_RANGE)
-            KeyEvent.KEYCODE_INFO -> toggleControls()
-            else -> return super.onKeyDown(keyCode, event)
+
+            else -> unhandeled++
         }
-        return true
+
+        return unhandeled < 2
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -374,10 +411,6 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
     private fun showToast(msg: String) {
         toast.setText(msg)
         toast.show()
-    }
-
-    private fun seekRelative(offset: Int) {
-        MPVLib.command(arrayOf("seek", offset.toString(), "relative"))
     }
 
     private fun resolveUri(data: Uri): String? {
@@ -489,6 +522,11 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
         updateDecoderButton()
     }
 
+    fun cycleSpeed(view: View) {
+        player.cycleSpeed()
+        updateSpeedButton()
+    }
+
     private fun prettyTime(d: Int): String {
         val hours = d / 3600
         val minutes = d % 3600 / 60
@@ -513,6 +551,7 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
         if (!userIsOperatingSeekbar)
             playbackSeekbar.progress = position
         updateDecoderButton()
+        updateSpeedButton()
     }
 
     private fun updatePlaybackDuration(duration: Int) {
@@ -528,6 +567,10 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
 
     private fun updateDecoderButton() {
         cycleDecoderBtn.text = if (player.hwdecActive!!) "HW" else "SW"
+    }
+
+    private fun updateSpeedButton() {
+        cycleSpeedBtn.text = "${player.playbackSpeed}x"
     }
 
     private fun updatePlaylistButtons() {
@@ -602,6 +645,8 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
     override fun event(eventId: Int) {
         // exit properly even when in background
         if (playbackHasStarted && eventId == MPVLib.mpvEventId.MPV_EVENT_IDLE)
+            finish()
+        else if(eventId == MPVLib.mpvEventId.MPV_EVENT_SHUTDOWN)
             finish()
 
         if (!activityIsForeground) return
@@ -687,10 +732,8 @@ class MPVActivity : Activity(), EventObserver, TouchGesturesObserver {
 
     companion object {
         private val TAG = "mpv"
-        // how long should controls be displayed on screen
+        // how long should controls be displayed on screen (ms)
         private val CONTROLS_DISPLAY_TIMEOUT = 2000L
-        // how far to seek backward/forward with (currently) TV remote buttons
-        private val BUTTON_SEEK_RANGE = 10
         // size (px) of the thumbnail displayed with background play notification
         private val THUMB_SIZE = 192
     }
