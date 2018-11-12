@@ -12,7 +12,6 @@ addons:
       - autoconf
       - pkg-config
       - libtool
-      - libzvbi-dev
 
 before_install:
   - sdkmanager "platforms;android-28"
