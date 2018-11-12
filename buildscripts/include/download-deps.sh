@@ -38,14 +38,14 @@ $WGET http://www.lua.org/ftp/lua-$v_lua.tar.gz -O - | \
 	tar -xz -f - --strip-components=1
 cd ..
 
-# mpv (travis downloads a tar.gz snapshot instead)
-[ $TRAVIS -eq 0 ] && \
-	git clone https://github.com/mpv-player/mpv
-
-cd ..
-
 # libiconv
 git clone https://github.com/hatharry/libiconv
 
 # zvbi
 git clone https://github.com/hatharry/zvbi
+
+# mpv (travis downloads a tar.gz snapshot instead)
+[ $TRAVIS -eq 0 ] && \
+	git clone https://github.com/mpv-player/mpv
+
+cd ..
