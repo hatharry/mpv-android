@@ -43,3 +43,9 @@ cd ..
 	git clone https://github.com/mpv-player/mpv
 
 cd ..
+
+# libiconv
+git clone https://github.com/hatharry/libiconv
+
+# zvbi
+git clone https://github.com/hatharry/zvbi
