@@ -14,7 +14,7 @@ build_prefix() {
 	for x in ${dep_mpv[@]}; do
 		echo "==> Building $x"
 		./buildall.sh --arch armv7l $x
-		./buildall.sh --arch arm64 $x
+		#./buildall.sh --arch arm64 $x
 		./buildall.sh --arch x86 $x
 	done
 
