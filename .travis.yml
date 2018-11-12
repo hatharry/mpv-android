@@ -1,4 +1,3 @@
-dist: xenial
 language: android
 sudo: false
 notifications:
