@@ -29,8 +29,8 @@ prefix_x86=$(nativeprefix "x86")
 
 PREFIX=$BUILD/prefix/armv7l PREFIX64=$prefix64 PREFIX_X64=$prefix_x64 PREFIX_X86=$prefix_x86 \
 ndk-build -C app/src/main -j$cores
-./gradlew assembleDebug
 for i in $MPV_ANDROID/app/src/main/libs/*
 do
 mv $i/libzvbi.{so,so.0}
 done
+./gradlew assembleDebug
