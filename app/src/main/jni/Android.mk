@@ -16,6 +16,11 @@ LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libzvbi
+LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so.0
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := libswresample
 LOCAL_SRC_FILES := $(PREFIX)/lib/$(LOCAL_MODULE).so
 include $(PREBUILT_SHARED_LIBRARY)
@@ -71,6 +76,6 @@ LOCAL_SRC_FILES := \
 	event.cpp \
 	thumbnail.cpp
 LOCAL_LDLIBS    := -llog -lGLESv3 -lEGL -latomic
-LOCAL_SHARED_LIBRARIES := libiconv swresample avutil avcodec avformat swscale avfilter avdevice mpv
+LOCAL_SHARED_LIBRARIES := libzvbi libiconv swresample avutil avcodec avformat swscale avfilter avdevice mpv
 
 include $(BUILD_SHARED_LIBRARY)
