@@ -15,7 +15,8 @@ mkdir -p _build$ndk_suffix
 cd _build$ndk_suffix
 
 ../configure \
-    --host=$ndk_triple
+    --host=$ndk_triple \
+	--enable-static --disable-shared \
 
 make -j$cores
 make DESTDIR="$prefix_dir" install

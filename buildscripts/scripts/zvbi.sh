@@ -21,10 +21,8 @@ export CXX=$ndk_triple-clang++
     --host=$ndk_triple \
     --disable-dvb --disable-bktr \
     --disable-nls --disable-proxy \
+    --enable-static --disable-shared \
     --without-doxygen
 
 make -j$cores
 make DESTDIR="$prefix_dir" install
-rm $prefix_dir/lib/libzvbi.so
-rm $prefix_dir/lib/libzvbi.so.0
-mv $prefix_dir/lib/libzvbi.so.0.13.2 $prefix_dir/lib/libzvbi.so
