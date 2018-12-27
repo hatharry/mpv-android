@@ -12,6 +12,7 @@ v_freetype=2-9-1
 v_mbedtls=2.12.0
 v_libiconv=1.15
 v_zvbi=0.2.35
+v_mpv=0.29.1
 
 
 ## Dependency tree
