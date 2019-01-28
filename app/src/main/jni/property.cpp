@@ -87,35 +87,33 @@ jni_func(jobject, getPropertyBoolean, jstring jproperty) {
 }
 
 jni_func(jobject, getPropertyCache, jstring jproperty) {
-    mpv_node node;
-    mpv_node node2;
-    mpv_node node3;
-    mpv_node node4;
-    if (common_get_property(env, env->NewStringUTF("demuxer-cache-state"), MPV_FORMAT_NODE, &node) < 0)
+    mpv_node node[4];
+    if (common_get_property(env, env->NewStringUTF("demuxer-cache-state"), MPV_FORMAT_NODE, &node[0]) < 0)
         return NULL;
-    for (int i = 0; i < node.u.list->num; i++){
-        if (!strcmp(node.u.list->keys[i], "seekable-ranges")){
-            node2 = node.u.list->values[i];
+
+    for (int i = 0; i < node[0].u.list->num; i++) {
+        if (!strcmp(node[0].u.list->keys[i], "seekable-ranges")) {
+            node[1] = node[0].u.list->values[i];
             break;
         }
     }
-	if (node2.format != MPV_FORMAT_NODE_ARRAY || node2.u.list->num <= 0){
+	if (node[1].format != MPV_FORMAT_NODE_ARRAY || node[1].u.list->num <= 0)
 		return NULL;
-	}
-    node3 = node2.u.list->values[0];
-	if (node3.format != MPV_FORMAT_NODE_MAP || node3.u.list->num <= 0){
+
+    node[2] = node[1].u.list->values[0];
+	if (node[2].format != MPV_FORMAT_NODE_MAP || node[2].u.list->num <= 0)
 		return NULL;
-	}
-    for (int i = 0; i < node3.u.list->num; i++){
-        if (!strcmp(node3.u.list->keys[i], env->GetStringUTFChars(jproperty, NULL))){
-            node4 = node3.u.list->values[i];
+
+    for (int i = 0; i < node[2].u.list->num; i++) {
+        if (!strcmp(node[2].u.list->keys[i], env->GetStringUTFChars(jproperty, NULL))) {
+            node[3] = node[2].u.list->values[i];
             break;
         }
     }
-	if (node4.format != MPV_FORMAT_DOUBLE){
+	if (node[3].format != MPV_FORMAT_DOUBLE)
 		return NULL;
-	}
-    return env->NewObject(java_Double, java_Double_init, (jdouble)node4.u.double_);
+
+    return env->NewObject(java_Double, java_Double_init, (jdouble)node[3].u.double_);
 }
 
 jni_func(jstring, getPropertyString, jstring jproperty) {
