@@ -39,7 +39,7 @@ if [ "$1" == "install" ]; then
 	echo "==> Fetching mpv"
 	mkdir -p deps/mpv
 	$WGET https://github.com/mpv-player/mpv/archive/${v_mpv}.tar.gz -O ${v_mpv}.tgz
-	tar -xzf v${v_mpv}.tgz -C deps/mpv --strip-components=1 && rm v${v_mpv}.tgz
+	tar -xzf ${v_mpv}.tgz -C deps/mpv --strip-components=1 && rm ${v_mpv}.tgz
 
 	echo "==> Trying to fetch existing prefix"
 	mkdir -p prefix
