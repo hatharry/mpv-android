@@ -16,7 +16,7 @@ cd _build$ndk_suffix
 
 export LDFLAGS="-L$prefix_dir/lib"
 export CFLAGS="-I$prefix_dir/include"
-export CXX=$ndk_triple21-clang++
+
 ../configure \
     --host=$ndk_triple \
     --disable-dvb --disable-bktr \
