@@ -16,6 +16,7 @@ cd _build$ndk_suffix
 
 export LDFLAGS="-L$prefix_dir/lib"
 export CFLAGS="-I$prefix_dir/include"
+export CXXFLAGS="-I$prefix_dir/include"
 
 ../configure \
     --host=$ndk_triple \
