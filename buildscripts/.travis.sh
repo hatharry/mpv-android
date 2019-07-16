@@ -14,8 +14,9 @@ build_prefix() {
 	for x in ${dep_mpv[@]}; do
 		echo "==> Building $x"
 		./buildall.sh --arch armv7l $x
-		#./buildall.sh --arch arm64 $x
+		./buildall.sh --arch arm64 $x
 		./buildall.sh --arch x86 $x
+		./buildall.sh --arch x86_64 $x
 	done
 
 	if [ -n "$GITHUB_TOKEN" ]; then
@@ -60,16 +61,22 @@ echo "==> Building mpv armv7l"
 	[ ! -f deps/mpv/_build/config.h ] && cat deps/mpv/_build/config.log
 	exit 1
 }
-#echo "==> Building mpv arm64"
-#./buildall.sh --no-deps --arch arm64 mpv || {
-#	# show logfile if configure failed
-#	[ ! -f deps/mpv/_build-arm64/config.h ] && cat deps/mpv/_build-arm64/config.log
-#	exit 1
-#}
+echo "==> Building mpv arm64"
+./buildall.sh --no-deps --arch arm64 mpv || {
+	# show logfile if configure failed
+	[ ! -f deps/mpv/_build-arm64/config.h ] && cat deps/mpv/_build-arm64/config.log
+	exit 1
+}
 echo "==> Building mpv x86"
 ./buildall.sh --no-deps --arch x86 mpv || {
 	# show logfile if configure failed
 	[ ! -f deps/mpv/_build-x86/config.h ] && cat deps/mpv/_build-x86/config.log
+	exit 1
+}
+echo "==> Building mpv x86_64"
+./buildall.sh --no-deps --arch x86_64 mpv || {
+	# show logfile if configure failed
+	[ ! -f deps/mpv/_build-x64/config.h ] && cat deps/mpv/_build-x64/config.log
 	exit 1
 }
 
