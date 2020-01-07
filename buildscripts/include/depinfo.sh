@@ -13,7 +13,7 @@ v_freetype=2-10-0
 v_mbedtls=2.16.1
 v_libiconv=1.15
 v_zvbi=0.2.35
-v_mpv=master
+v_mpv=v0.31.0
 
 
 ## Dependency tree
@@ -34,7 +34,7 @@ dep_mpv_android=(mpv)
 ## Travis-related
 
 # pinned ffmpeg commit used by travis-ci
-v_travis_ffmpeg=n4.2.1
+v_travis_ffmpeg=n4.2.2
 
 # filename used to uniquely identify a build prefix
 travis_tarball="prefix-ndk-${v_ndk}-lua-${v_lua}-libass-${v_libass}-fribidi-${v_fribidi}-freetype-${v_freetype}-mbedtls-${v_mbedtls}-libiconv-${v_libiconv}-zvbi-${v_zvbi}-ffmpeg-${v_travis_ffmpeg}.tgz"
