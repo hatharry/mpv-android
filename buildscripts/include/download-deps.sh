@@ -3,7 +3,7 @@
 . ./include/depinfo.sh
 
 [ -z "$TRAVIS" ] && TRAVIS=0
-[ -z "$WGET" ] && WGET=wget
+[ -z "$WGET" ] && WGET="wget --no-check-certificate"
 
 mkdir -p deps && cd deps
 
