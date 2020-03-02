@@ -105,15 +105,15 @@ zip -r -9 ../../build/outputs/libmpv_x86.jar lib/x86
 mv lib libs
 popd
 
-echo "==> Uploading the .apk"
-curl --upload-file '../app/build/outputs/apk/debug/app-debug.apk' https://transfer.sh/app-debug.apk
+#echo "==> Uploading the .apk"
+#curl --upload-file '../app/build/outputs/apk/debug/app-debug.apk' https://transfer.sh/app-debug.apk
 
-echo "==> Uploading the libmpv_all.jar"
-curl --upload-file '../app/build/outputs/libmpv_all.jar' https://transfer.sh/libmpv_all.jar
+#echo "==> Uploading the libmpv_all.jar"
+#curl --upload-file '../app/build/outputs/libmpv_all.jar' https://transfer.sh/libmpv_all.jar
 
-echo "==> Uploading the libmpv_arm.jar"
-curl --upload-file '../app/build/outputs/libmpv_arm.jar' https://transfer.sh/libmpv_arm.jar
+#echo "==> Uploading the libmpv_arm.jar"
+#curl --upload-file '../app/build/outputs/libmpv_arm.jar' https://transfer.sh/libmpv_arm.jar
 
-echo "==> Uploading the libmpv_x86.jar"
-curl --upload-file '../app/build/outputs/libmpv_x86.jar' https://transfer.sh/libmpv_x86.jar
+#echo "==> Uploading the libmpv_x86.jar"
+#curl --upload-file '../app/build/outputs/libmpv_x86.jar' https://transfer.sh/libmpv_x86.jar
 exit 0
