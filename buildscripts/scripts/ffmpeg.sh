@@ -28,7 +28,8 @@ cpuflags=
 	--extra-cflags="-I$prefix_dir/include $cpuflags" --extra-ldflags="-L$prefix_dir/lib" \
 	--disable-static --enable-shared --enable-version3 \
 	--pkg-config=pkg-config --disable-{debug,doc,programs} \
-	--disable-{muxers,encoders,devices} --enable-muxer={opus,flac,mp3,mp4,ogg,wav}
+	--disable-{muxers,encoders,devices} --enable-muxer={opus,flac,mp3,mp4,ogg,wav} \
+	--enable-protocol=file
 
 make -j$cores
 make DESTDIR="$prefix_dir" install
