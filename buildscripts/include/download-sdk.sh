@@ -11,7 +11,7 @@ if [ "$os" == "linux" ]; then
 	hash yum &> /dev/null && sudo yum install zlib.i686 ncurses-libs.i686 bzip2-libs.i686 \
 		autoconf m4 pkgconfig libtool
 	apt-get -v &> /dev/null && [ $TRAVIS -eq 0 ] && \
-		sudo apt-get install autoconf pkg-config libtool ninja-build python3-pip python3-setuptools && \
+		sudo apt-get install autoconf pkg-config libtool ninja-build python3-pip python3-setuptools nasm && \
 		sudo pip3 install meson
 
 	os_ndk="linux"
