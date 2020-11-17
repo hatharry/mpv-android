@@ -1,4 +1,4 @@
-package is.xyz.mpv;
+package is.xyz.mpv.config;
 
 import android.content.Context;
 import android.preference.EditTextPreference;
@@ -6,8 +6,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 
 public class SummaryEditTextPreference extends EditTextPreference {
-
-    private String formatString;
 
     public SummaryEditTextPreference(Context context, AttributeSet attrs, int defStyle) { super(context, attrs, defStyle); }
     public SummaryEditTextPreference(Context context, AttributeSet attrs) {
@@ -17,11 +15,10 @@ public class SummaryEditTextPreference extends EditTextPreference {
         super(context);
     }
 
-    // originally from somewhere on stack overflow, can't remember where.
+    // https://stackoverflow.com/questions/7017082/#answer-7018053
     @Override
     public CharSequence getSummary() {
         String text = getText();
-        formatString = text;
         if (TextUtils.isEmpty(text)) {
             return getEditText().getHint();
         } else {
@@ -32,9 +29,5 @@ public class SummaryEditTextPreference extends EditTextPreference {
                 return null;
             }
         }
-    }
-
-    public String getFormatString() {
-        return formatString;
     }
 }

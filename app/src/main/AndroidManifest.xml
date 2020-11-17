@@ -13,13 +13,21 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
         android:resizeableActivity="true"
+        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/mpv_launcher_icon"
         android:roundIcon="@mipmap/mpv_launcher_icon"
         android:label="@string/mpv_activity">
+        <!-- Multi-window support on some devices -->
+        <meta-data android:name="com.samsung.android.sdk.multiwindow.enable"
+            android:value="true" />
+        <meta-data android:name="com.lge.support.SPLIT_WINDOW"
+            android:value="true" />
+
         <activity
             android:name=".MPVActivity"
             android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize|keyboardHidden|keyboard"
@@ -41,12 +49,14 @@
                 <data android:scheme="tcp" />
                 <data android:scheme="udp" />
             </intent-filter>
-            <intent-filter> <!-- MIME type only (e.g. Google Drive) -->
+            <intent-filter> <!-- Local files with MIME type (e.g. Google Drive) -->
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme="content" />
+                <data android:scheme="file" />
                 <data android:mimeType="video/*" />
                 <data android:mimeType="audio/*" />
             </intent-filter>
@@ -138,6 +148,11 @@
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.m3u8*" />
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.m3u8*" />
             </intent-filter>
+            <intent-filter> <!-- Share action -->
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".MainActivity"
@@ -151,9 +166,18 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".FilePickerActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="behind"
+            android:theme="@style/FilePickerDialogTheme"
+            android:exported="false" />
+        <activity
+            android:name=".config.SettingsActivity"
             android:label="@string/title_activity_settings" />
-        <service android:name=".BackgroundPlaybackService" android:exported="false" />
+        <service
+            android:name=".BackgroundPlaybackService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
         <receiver android:name=".NotificationButtonReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="is.xyz.mpv.ACTION_PREV" />

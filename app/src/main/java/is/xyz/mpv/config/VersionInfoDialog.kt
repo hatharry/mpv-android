@@ -1,5 +1,8 @@
-package `is`.xyz.mpv
+package `is`.xyz.mpv.config
 
+import `is`.xyz.mpv.BuildConfig
+import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.R
 import android.content.Context
 import android.util.AttributeSet
 import android.preference.DialogPreference
@@ -12,7 +15,7 @@ class VersionInfoDialog @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = android.R.attr.dialogPreferenceStyle,
     defStyleRes: Int = 0
-): DialogPreference(context, attrs, defStyleAttr, defStyleRes), LogObserver {
+): DialogPreference(context, attrs, defStyleAttr, defStyleRes), MPVLib.LogObserver {
     init {
         isPersistent = false
         dialogLayoutResource = R.layout.version_dialog

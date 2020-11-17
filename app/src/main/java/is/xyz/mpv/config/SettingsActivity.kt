@@ -1,13 +1,10 @@
-package `is`.xyz.mpv
+package `is`.xyz.mpv.config
 
 
-import android.annotation.TargetApi
+import `is`.xyz.mpv.R
 import android.content.Context
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
-import android.preference.ListPreference
-import android.preference.Preference
 import android.preference.PreferenceActivity
 import android.preference.PreferenceFragment
 import android.view.MenuItem
@@ -48,7 +45,6 @@ class SettingsActivity : PreferenceActivity() {
     /**
      * {@inheritDoc}
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     override fun onBuildHeaders(target: List<PreferenceActivity.Header>) {
         loadHeadersFromResource(R.xml.pref_headers, target)
     }
@@ -66,27 +62,28 @@ class SettingsActivity : PreferenceActivity() {
      * This method stops fragment injection in malicious applications.
      * Make sure to deny any unknown fragments here.
      */
+    private val validFragments = setOf(
+            PreferenceFragment::class.java.name,
+            GeneralPreferenceFragment::class.java.name,
+            GesturesPreferenceFragment::class.java.name,
+            VideoPreferenceFragment::class.java.name,
+            DeveloperPreferenceFragment::class.java.name,
+            AdvancedPreferenceFragment::class.java.name
+    )
+
     override fun isValidFragment(fragmentName: String): Boolean {
-        return PreferenceFragment::class.java.name == fragmentName
-                || GeneralPreferenceFragment::class.java.name == fragmentName
-                || VideoPreferenceFragment::class.java.name == fragmentName
-                || DeveloperPreferenceFragment::class.java.name == fragmentName
-                || AdvancedPreferenceFragment::class.java.name == fragmentName
+        return validFragments.contains(fragmentName)
     }
 
     /**
      * This fragment shows general preferences only. It is used when the
      * activity is showing a two-pane settings UI.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     class GeneralPreferenceFragment : PreferenceFragment() {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             addPreferencesFromResource(R.xml.pref_general)
             setHasOptionsMenu(true)
-
-            bindPreferenceSummaryToValue(findPreference("default_audio_language"))
-            bindPreferenceSummaryToValue(findPreference("default_subtitle_language"))
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -99,17 +96,27 @@ class SettingsActivity : PreferenceActivity() {
         }
     }
 
+    class GesturesPreferenceFragment : PreferenceFragment() {
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            addPreferencesFromResource(R.xml.pref_gestures)
+            setHasOptionsMenu(true)
+        }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+        override fun onOptionsItemSelected(item: MenuItem): Boolean {
+            if (item.itemId == android.R.id.home) {
+                activity.onBackPressed()
+                return true
+            }
+            return super.onOptionsItemSelected(item)
+        }
+    }
+
     class VideoPreferenceFragment : PreferenceFragment() {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             addPreferencesFromResource(R.xml.pref_video)
             setHasOptionsMenu(true)
-
-            bindPreferenceSummaryToValue(findPreference("video_scale"))
-            bindPreferenceSummaryToValue(findPreference("video_downscale"))
-
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -122,13 +129,11 @@ class SettingsActivity : PreferenceActivity() {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     class DeveloperPreferenceFragment : PreferenceFragment() {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             addPreferencesFromResource(R.xml.pref_developer)
             setHasOptionsMenu(true)
-
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -141,13 +146,11 @@ class SettingsActivity : PreferenceActivity() {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     class AdvancedPreferenceFragment : PreferenceFragment() {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             addPreferencesFromResource(R.xml.pref_advanced)
             setHasOptionsMenu(true)
-
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -162,59 +165,11 @@ class SettingsActivity : PreferenceActivity() {
 
     companion object {
         /**
-         * A preference value change listener that updates the preference's summary
-         * to reflect its new value.
-         */
-        private val sBindPreferenceSummaryToValueListener = Preference.OnPreferenceChangeListener { preference, value ->
-            val stringValue = value.toString()
-
-            if (preference is ListPreference) {
-                // For list preferences, look up the correct display value in
-                // the preference's 'entries' list.
-                val index = preference.findIndexOfValue(stringValue)
-
-                // Set the summary to reflect the new value.
-                preference.setSummary(
-                        if (index >= 0)
-                            preference.entries[index]
-                        else
-                            null)
-            } else if (preference is SummaryEditTextPreference) {
-                val formatString = preference.formatString
-                String.format(formatString ?: "%s", stringValue)
-
-            } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
-                preference.summary = stringValue
-            }
-            true
-        }
-
-        /**
          * Helper method to determine if the device has an extra-large screen. For
          * example, 10" tablets are extra-large.
          */
         private fun isXLargeTablet(context: Context): Boolean {
             return context.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_XLARGE
-        }
-
-        /**
-         * Binds a preference's summary to its value. More specifically, when the
-         * preference's value is changed, its summary (line of text below the
-         * preference title) is updated to reflect the value. The summary is also
-         * immediately updated upon calling this method. The exact display format is
-         * dependent on the type of preference.
-
-         * @see .sBindPreferenceSummaryToValueListener
-         */
-        private fun bindPreferenceSummaryToValue(preference: Preference) {
-            // Set the listener to watch for value changes.
-            preference.onPreferenceChangeListener = sBindPreferenceSummaryToValueListener
-
-            // Trigger the listener immediately with the preference's
-            // current value.
-            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, preference.summary.toString())
         }
     }
 }

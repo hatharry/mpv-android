@@ -23,16 +23,13 @@
     <string name="pref_default_file_manager_path_hint">Velg forvalgt filutforsker-sti</string>
 
     <string name="pref_default_audio_language_title">Forvalgt talespråk</string>
-    <string name="pref_default_audio_language_hint">Velg forvalgt talespråk for avspilling av video med mer enn ett språk</string>
 
     <string name="pref_default_subtitle_language_title">Forvalgt undertekst-språk</string>
-    <string name="pref_default_subtitle_language_hint">Velg forvalgt undertekst-språk for avspilling av video med mer enn ett språk</string>
 
     <string name="pref_hardware_decoding_title">Maskinvaredekoding</string>
     <string name="pref_hardware_decoding_summary">Prøver maskinvarebasert dekoding, og faller tilbake på programvarebasert dekoding hvis det ikke virker</string>
 
-     <string name="pref_touch_gestures_title">Håndvendinger</string>
-     <string name="pref_touch_gestures_summary">Kontroller lys- og lyd-styrke, eller sanntidsspol ved bruk av håndvendinger.</string>
+    <string name="pref_header_gestures">Håndvendinger</string>
 
     <string name="pref_header_video">Video</string>
 
@@ -43,14 +40,11 @@
     <string name="pref_video_debanding_title">Fargeovergangsutgjevning</string>
     <string name="pref_video_debanding_summary">Velg modus for utjevning av skilte fargeoverganger for video.</string>
 
-    <string name="pref_video_sync_title">Videosynkronisering</string>
-    <string name="pref_video_sync_summary">Velg hvordan avspilleren synkroniserer lyd og bilde</string>
-
     <string name="pref_video_tscale_title">Tidsbestemt interpoleringsfilter</string>
     <string name="pref_video_tscale_message">Filter brukt til interpolering av tidsaksen (rammer).\nKun brukt hvis interpolering er påskrudd nedenfor.</string>
 
     <string name="pref_video_interpolation_title">Interpolering</string>
-    <string name="pref_video_interpolation_summary">Reduser risting som følge av utakt mellom ramme- og visningsfrekvens\nKrever at \"Videosynkronisering\" er satt til én av display-*modusene</string>
+    <string name="pref_video_interpolation_message">Reduser risting som følge av utakt mellom ramme- og visningsfrekvens</string>
 
     <string name="pref_video_fastdecode_title">Lavkvalitets-videodekoding</string>
     <string name="pref_video_fastdecode_summary">Forsaker kvalitet for hastighet, og motvirker dermed hakking.\nREDUSERER KVALITETEN BETRAKTELIG</string>
@@ -64,23 +58,18 @@
     <string name="pref_advanced_version">Vare Versjonsinformasjon</string>
 
     <string name="pref_advanced_mpvconf">Endre Konfigurasjonsfilen</string>
-    <string name="pref_advanced_mpvconf_message">Du kan direkte redigere innstiller fil av mpv her.\n\nHusk: mpv-android overskriver noen innstillinger, så prøv ikke å angi for eksempel \"dscale\" her.\nDette gjelder alle innstillinger som kan endres i innstillingsmenyen.</string>
+    <string name="pref_advanced_mpvconf_message">Du kan direkte redigere innstiller fil av mpv her.</string>
 
     <!-- Strings indirectly related to Settings -->
     <string name="scaler_param1">Parameter 1:</string>
     <string name="scaler_param2">Parameter 2:</string>
     <string name="pref_background_play_title">Bakgrunnsavspilling</string>
     <string name="pref_background_play_summary">Når skal du automatisk fortsette avspillingen i bakgrunnen</string>
-    <string name="pref_background_play_default">aldri</string>
-    <string name="pref_video_sync_default">Lydstrøm</string>
     <string name="pref_developer_stats_title">Vis statistikk</string>
     <string name="pref_developer_stats_summary">Velg hvilken statistikk vises</string>
-    <string name="pref_developer_gpudebug_summary">Bytter videogjengivelse til feilsøkingsmodus</string>
-    <string name="nnf_new_folder">Ny mappe</string>
-    <string name="nnf_create_folder_error">Kunne ikke opprette ny mappe</string>
+    <string name="interpolation_switch">Aktiver interpolering</string>
+    <string name="interpolation_video_sync">Videosynkronisering:</string>
     <string name="nnf_name">Navn</string>
-    <string name="nnf_select_something_first">Velg noe først</string>
-    <string name="nnf_need_valid_filename">Skriv inn eller velg et gyldig filnavn</string>
     <string name="nnf_permission_external_write_denied">Tillatelse til å få tilgang filsystemet nektes</string>
     <string name="nnf_filename">Filnavn</string>
 </resources>

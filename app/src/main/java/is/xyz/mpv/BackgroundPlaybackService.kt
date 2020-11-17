@@ -1,9 +1,7 @@
 package `is`.xyz.mpv
 
-import android.app.Notification
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -17,30 +15,28 @@ import android.util.Log
     - Update the persistent notification (which we're forced to display)
 */
 
-class BackgroundPlaybackService : Service(), EventObserver {
+class BackgroundPlaybackService : Service(), MPVLib.EventObserver {
     override fun onCreate() {
         MPVLib.addObserver(this)
-        MPVLib.observeProperty("media-title", MPVLib.mpvFormat.MPV_FORMAT_STRING)
-        MPVLib.observeProperty("metadata/by-key/Artist", MPVLib.mpvFormat.MPV_FORMAT_STRING)
-        MPVLib.observeProperty("metadata/by-key/Album", MPVLib.mpvFormat.MPV_FORMAT_STRING)
     }
 
-    private var cachedMediaTitle: String? = null
-    private var cachedMediaArtist: String? = null
-    private var cachedMediaAlbum: String? = null
+    private var cachedMetadata = Utils.AudioMetadata()
     private var shouldShowPrevNext: Boolean = false
 
     private fun createButtonIntent(action: String): PendingIntent {
         val intent = Intent()
         intent.action = "is.xyz.mpv.$action"
+        // turn into explicit intent:
+        intent.component = ComponentName(applicationContext, NotificationButtonReceiver::class.java)
         return PendingIntent.getBroadcast(this, 0, intent, 0)
     }
 
+    @Suppress("DEPRECATION") // deliberate to support lower API levels
     private fun buildNotification(): Notification {
         val notificationIntent = Intent(this, MPVActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
 
-        val builder: Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
         else
             Notification.Builder(this)
@@ -48,22 +44,29 @@ class BackgroundPlaybackService : Service(), EventObserver {
         builder
                 .setPriority(Notification.PRIORITY_LOW)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setContentTitle(cachedMediaTitle)
+                .setContentTitle(cachedMetadata.formatTitle())
+                .setContentText(cachedMetadata.formatArtistAlbum())
                 .setSmallIcon(R.drawable.ic_mpv_symbolic)
                 .setContentIntent(pendingIntent)
-        if (thumbnail != null)
-            builder.setLargeIcon(thumbnail)
-        if (!cachedMediaArtist.isNullOrEmpty() && !cachedMediaAlbum.isNullOrEmpty())
-            builder.setContentText("$cachedMediaArtist / $cachedMediaAlbum")
-        else if (!cachedMediaArtist.isNullOrEmpty())
-            builder.setContentText(cachedMediaAlbum)
-        else if (!cachedMediaAlbum.isNullOrEmpty())
-            builder.setContentText(cachedMediaArtist)
+
+        thumbnail?.let {
+            builder.setLargeIcon(it)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder.setColorized(true)
+                // scale thumbnail to a single color in two steps
+                val b1 = Bitmap.createScaledBitmap(it, 16, 16, true)
+                val b2 = Bitmap.createScaledBitmap(b1, 1, 1, true)
+                builder.setColor(b2.getPixel(0, 0))
+                b2.recycle(); b1.recycle()
+            }
+        }
         if (shouldShowPrevNext) {
             // action icons need to be 32dp according to the docs
             builder.addAction(R.drawable.ic_skip_previous_black_32dp, "Prev", createButtonIntent("ACTION_PREV"))
             builder.addAction(R.drawable.ic_skip_next_black_32dp, "Next", createButtonIntent("ACTION_NEXT"))
-            builder.setStyle(Notification.MediaStyle().setShowActionsInCompactView(0, 1))
+            builder.style = Notification.MediaStyle().setShowActionsInCompactView(0, 1)
+        } else {
+            builder.style = Notification.MediaStyle()
         }
 
         return builder.build()
@@ -74,9 +77,7 @@ class BackgroundPlaybackService : Service(), EventObserver {
 
         // read some metadata
 
-        cachedMediaTitle = MPVLib.getPropertyString("media-title")
-        cachedMediaArtist = MPVLib.getPropertyString("metadata/by-key/Artist")
-        cachedMediaAlbum = MPVLib.getPropertyString("metadata/by-key/Album")
+        cachedMetadata.readAll()
         shouldShowPrevNext = MPVLib.getPropertyInt("playlist-count") ?: 0 > 1
 
         // create notification and turn this into a "foreground service"
@@ -84,12 +85,7 @@ class BackgroundPlaybackService : Service(), EventObserver {
         val notification = buildNotification()
         startForeground(NOTIFICATION_ID, notification)
 
-        // resume playback (audio-only)
-
-        MPVLib.setPropertyString("vid", "no")
-        MPVLib.setPropertyBoolean("pause", false)
-
-        return Service.START_NOT_STICKY // Android can't restart this service on its own
+        return START_NOT_STICKY // Android can't restart this service on its own
     }
 
     override fun onDestroy() {
@@ -109,12 +105,8 @@ class BackgroundPlaybackService : Service(), EventObserver {
     override fun eventProperty(property: String, value: Long) { }
 
     override fun eventProperty(property: String, value: String) {
-        when (property) {
-            "media-title" -> cachedMediaTitle = value
-            "metadata/by-key/Artist" -> cachedMediaArtist = value
-            "metadata/by-key/Album" -> cachedMediaAlbum = value
-            else -> return
-        }
+        if (!cachedMetadata.update(property, value))
+            return
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, buildNotification())
@@ -131,8 +123,20 @@ class BackgroundPlaybackService : Service(), EventObserver {
            to display alongside the permanent notification */
         var thumbnail: Bitmap? = null
 
-        private val NOTIFICATION_ID = 12345 // TODO: put this into resource file
-        val NOTIFICATION_CHANNEL_ID = "background_playback"
-        private val TAG = "mpv"
+        private const val NOTIFICATION_ID = 12345
+        private const val NOTIFICATION_CHANNEL_ID = "background_playback"
+
+        fun createNotificationChannel(context: Context) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val name = context.getString(R.string.pref_background_play_title)
+                val channel = NotificationChannel(
+                        NOTIFICATION_CHANNEL_ID,
+                        name, NotificationManager.IMPORTANCE_MIN)
+                val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.createNotificationChannel(channel)
+            }
+        }
+
+        private const val TAG = "mpv"
     }
 }
