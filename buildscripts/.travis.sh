@@ -82,8 +82,8 @@ echo "==> Building mpv-android"
 ./buildall.sh --no-deps
 
 echo "==> Compressing the jar"
-pushd ../app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
-zip -r -9 ../../../../../outputs/libmpv_all.jar is/xyz/mpv
+pushd ../app/build/intermediates/javac/debug/classes/
+zip -r -9 ../../../../outputs/libmpv_all.jar is/xyz/mpv
 popd
 
 pushd ../app/build/tmp/kotlin-classes/debug/
